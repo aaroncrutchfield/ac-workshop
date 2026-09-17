@@ -1,27 +1,55 @@
 # Codex Images
 
-**Stay in Claude Code. Generate and edit images with Codex CLI.**
+**Generate and edit images without leaving Claude Code.**
 
-This self-contained skill lets a shell-based agent call Codex's image tool and save the result to a chosen project path. No browser automation or other toolkit skills required.
+Describe what you want. Claude Code uses Codex CLI to create the image and save it in your project.
 
 ## See it work
 
 ![Generate an orange mug, then edit it to blue: real Codex CLI outputs side by side.](assets/generate-and-edit.png)
 
-Real outputs from this wrapper, not mockups. The edit request changed the glaze color while asking to preserve the scene. See [prompts and verification](examples/README.md). Results vary; inspect edits for unintended changes.
+One prompt created the orange mug. Another changed it to blue. These are real outputs from this skill, not mockups. See the [prompts and verification](examples/README.md). Edits can change unintended details, so review the result.
 
-## Requirements
+## Get started
 
-- Python 3.10 or newer (standard library only).
-- Codex CLI installed and signed in with `codex login`.
-- Account access to Codex image generation. Account limits and usage apply.
-- An agent that can run shell commands, such as Claude Code, or a terminal.
+Run this from your project folder:
 
-Tested with Codex CLI **0.153.4 on macOS**. CI is configured to test Linux and macOS file handling; live Linux generation has not been verified. Windows is not currently tested. Feature flags and event formats can change between CLI releases.
+```bash
+npx skills add aaroncrutchfield/ac-workshop --skill codex-images --agent claude-code
+```
 
-## Install just this skill
+You'll need Claude Code, Node.js and npm, Python 3.10 or newer, and Codex CLI signed in with access to image generation. Account limits and usage apply.
 
-[Download codex-images.zip](https://github.com/aaroncrutchfield/ac-workshop/releases/download/codex-images-v0.1.1/codex-images.zip), unzip it, and put the entire `codex-images` folder inside your project's `.claude/skills/` directory:
+This installs only `codex-images` for the current project. No other workshop skills are required.
+
+## Make your first image
+
+Ask Claude Code:
+
+> Use codex-images to generate an orange mug on a charcoal desk. Save it to assets/mug.png.
+
+Then try an edit:
+
+> Use codex-images to edit assets/mug.png. Change only the mug to cobalt blue and save it as assets/mug-blue.png.
+
+Claude Code still follows your normal command permissions. This skill does not bypass them.
+
+## How it works
+
+![How it works: your request in Claude Code goes to the bundled Python wrapper, which calls Codex CLI to generate or edit an image, then copies that run's image into your project.](assets/how-it-works.png)
+
+You describe the image. The skill calls Codex CLI, finds the image from that run, and copies it to your chosen location.
+
+It does not overwrite an existing file or automatically retry a generation.
+
+## Tested with
+
+Generation and editing were verified on macOS with Codex CLI **0.153.4**. Automated file-handling checks are configured for Linux and macOS; live generation on Linux and Windows has not been verified. Feature flags and event formats can change between CLI releases.
+
+<details>
+<summary>Manual installation</summary>
+
+[Download codex-images.zip](https://github.com/aaroncrutchfield/ac-workshop/releases/download/codex-images-v0.1.1/codex-images.zip), unzip it, and place the entire `codex-images` folder inside your project's `.claude/skills/` directory:
 
 ```text
 my-project/
@@ -34,19 +62,12 @@ my-project/
     LICENSE
 ```
 
-Keep its supporting files together. You do not need to clone the workshop or install another plugin. The README is for you; SKILL.md contains the agent's workflow.
+Keep the supporting files together. You do not need to clone the workshop or install another plugin.
 
-Then ask Claude Code:
+</details>
 
-> Use codex-images to generate an orange mug on a charcoal desk. Save it to assets/mug.png.
-
-For an edit:
-
-> Use codex-images to edit assets/mug.png. Change only the mug to cobalt blue and save it as assets/mug-blue.png.
-
-Claude Code still needs permission to run the command under your normal settings. This skill does not bypass those settings.
-
-## Use from a terminal
+<details>
+<summary>Use it from a terminal</summary>
 
 Run from your project root after installation:
 
@@ -63,15 +84,19 @@ python3 .claude/skills/codex-images/scripts/codex_image.py \
   -- 'Keep the scene and mug shape unchanged. Change only the mug glaze to cobalt blue.'
 ```
 
-## How it works
+</details>
 
-![How it works: your request in Claude Code goes to the bundled Python wrapper, which calls Codex CLI to generate or edit an image, then copies that run's image into your project.](assets/how-it-works.png)
+<details>
+<summary>Implementation details</summary>
 
-The wrapper explicitly selects the read-only shell sandbox for the child Codex run. It ignores the user's CLI config to avoid inheriting unrelated settings; authentication remains in place. After the run, Python copies exactly one generated image from the matching thread directory into your chosen output location.
+The wrapper selects the read-only shell sandbox for the child Codex run. It ignores the user's CLI config to avoid inheriting unrelated settings while keeping authentication in place. After the run, Python copies exactly one generated image from the matching thread directory into your chosen output location.
 
 It never scans other runs for a newer image, silently overwrites an output, or automatically retries a generation. The wrapper is a local program with your filesystem permissions; the child's sandbox does not sandbox the wrapper itself.
 
-## Troubleshooting
+</details>
+
+<details>
+<summary>Troubleshooting</summary>
 
 - **CLI missing or not signed in:** install Codex CLI and run `codex login` first.
 - **Image generation unavailable:** check account access and CLI compatibility. Supporting `--enable` alone does not prove image generation is available.
@@ -79,6 +104,8 @@ It never scans other runs for a newer image, silently overwrites an output, or a
 - **Output exists:** choose a new filename. There is intentionally no overwrite switch.
 - **Wrong extension:** use the extension the error reports; the wrapper does not disguise a JPEG as a PNG.
 - **Timeout:** default is 600 seconds; override with `--timeout 900` if needed. Check the prior run before retrying.
+
+</details>
 
 ## License
 
