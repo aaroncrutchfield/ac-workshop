@@ -6,9 +6,7 @@ This self-contained skill lets a shell-based agent call Codex's image tool and s
 
 ## See it work
 
-| Generate | Edit |
-| --- | --- |
-| ![Generated orange ceramic mug on a desk](examples/mug-orange.png) | ![The same mug edited to cobalt blue](examples/mug-blue.png) |
+![Generate an orange mug, then edit it to blue: real Codex CLI outputs side by side.](assets/generate-and-edit.png)
 
 Real outputs from this wrapper, not mockups. The edit request changed the glaze color while asking to preserve the scene. See [prompts and verification](examples/README.md). Results vary; inspect edits for unintended changes.
 
@@ -23,7 +21,7 @@ Tested with Codex CLI **0.153.4 on macOS**. CI is configured to test Linux and m
 
 ## Install just this skill
 
-[Download codex-images.zip](https://github.com/aaroncrutchfield/ac-workshop/releases/download/codex-images-v0.1.0/codex-images.zip), unzip it, and put the entire `codex-images` folder inside your project's `.claude/skills/` directory:
+[Download codex-images.zip](https://github.com/aaroncrutchfield/ac-workshop/releases/download/codex-images-v0.1.1/codex-images.zip), unzip it, and put the entire `codex-images` folder inside your project's `.claude/skills/` directory:
 
 ```text
 my-project/
@@ -67,13 +65,7 @@ python3 .claude/skills/codex-images/scripts/codex_image.py \
 
 ## How it works
 
-```mermaid
-flowchart LR
-  A[Your request in Claude Code] --> B[Bundled Python wrapper]
-  B --> C[Codex CLI image tool]
-  C --> D[Image in this run's directory]
-  D --> E[Wrapper copies it into your project]
-```
+![How it works: your request in Claude Code goes to the bundled Python wrapper, which calls Codex CLI to generate or edit an image, then copies that run's image into your project.](assets/how-it-works.png)
 
 The wrapper explicitly selects the read-only shell sandbox for the child Codex run. It ignores the user's CLI config to avoid inheriting unrelated settings; authentication remains in place. After the run, Python copies exactly one generated image from the matching thread directory into your chosen output location.
 
